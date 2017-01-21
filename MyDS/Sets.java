@@ -1,7 +1,5 @@
 package MyDS;
 
-import java.util.HashSet;
-
 public class Sets {
     private int arr[];
     private int size[];
@@ -36,15 +34,9 @@ public class Sets {
         }
     }
     public int countSets(int start,int end) {
-        HashSet<Integer> hs = new HashSet<>();
-        int count = 0;
-        int t;
+    	int count = 0;
         for(int i=start;i<=end;i++) {
-            t = root(i);
-            if(!hs.contains(t)) {
-                count++;
-                hs.add(t);
-            }
+            if(i==arr[i]) count++;
         }
         return count;
     }
