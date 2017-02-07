@@ -7,8 +7,8 @@ public class STTester {
 		SegmentTree obj = new SegmentTree(5);
 		obj.create(arr, 0, 4, 0);
 //		for(int i=0;i<obj.ST.length;i++) System.out.println(obj.ST[i]);
-		obj.updateSTRange(0,4, 1, 0, 4, 0);
-		System.out.println(obj.rangeSumQuery(2, 4, 0, 4, 0));
+		obj.updateSTRange(0,4, 3, 0, 4, 0);
+		System.out.println(obj.rangeSumQuery(4, 4, 0, 4, 0));
 		
 	}
 
