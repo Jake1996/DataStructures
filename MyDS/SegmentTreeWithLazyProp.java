@@ -3,18 +3,14 @@ package MyDS;
 public class SegmentTreeWithLazyProp {
 	public long ST[];
 	public long lazy[];
+	public int size;
 	public SegmentTreeWithLazyProp(int size) {
+		this.size = size-1;
 		int len =largestPower(size);
 		if(len==size) len = len<<1;
 		else len = len<<2;
 		ST = new long[len];
 		lazy = new long[len];
-	}
-	public static void main(String args[]) {
-		new SegmentTreeWithLazyProp(10000000);
-		long arr[] = new long[33554432];
-		long arr1[] = new long[33554432];
-		long arr2[] = new long[33554432];
 	}
 	private static int largestPower(int n){
 		n = n|(n>>1);
@@ -23,46 +19,71 @@ public class SegmentTreeWithLazyProp {
 		n = n|(n>>8);
 		return (n+1)>>1;
 	}
-	public long create(long arr[],int start,int end,int curr) {
+	public void initialize(long arr[]) {
+		initialize(arr, 1, 0, size);
+	}
+	public void updateRange(int l,int r,long delta) {
+		updateRange(1, 0, size, l, r, delta);
+	}
+	public long queryRange(int l,int r) {
+		return queryRange(1, 0, size, l, r);
+	}
+	public long initialize(long arr[],int node,int start,int end) {
 		if(start==end) {
-			ST[curr] = arr[start];
-			return ST[curr];
+			ST[node] = arr[start];
+			return ST[node];
 		}
 		int mid = (start+end)/2;
-		ST[curr] = create(arr,start,mid,2*curr+1) + create(arr,mid+1,end,2*curr+2);
-		return ST[curr];
+		ST[node] = initialize(arr,2*node+1,start,mid) + initialize(arr,2*node+2,mid+1,end);
+		return ST[node];
 	}
-	public long rangeSumQuery(int qlow,int qhigh,int low,int high,int pos) {
-		if(qlow<=low&&qhigh>=high) {
-			return ST[pos];
+	public void updateRange(int node,int start,int end,int l,int r,long delta) {
+		if(lazy[node]!=0) {
+			ST[node] += (end-start+1)*lazy[node];
+			if(start!=end) {
+				lazy[node*2] += lazy[node];
+				lazy[node*2+1] += lazy[node];
+			}
+			lazy[node] = 0;
 		}
-		if(qlow>high||qhigh<low) {
+		if(start>end || start>r || end<l) 
+			return;
+		if(start >= l && end <=r) {
+			ST[node] += (end-start+1)*delta;
+			if(start!=end) {
+				lazy[node*2] += delta;
+				lazy[node*2+1] += delta;
+			}
+			return;
+		}
+		int mid = (start+end)/2;
+		updateRange(node*2, start, mid, l, r, delta);
+		updateRange(node*2+1, mid+1, end, l, r, delta);
+		ST[node] = ST[node*2] + ST[node*2+1];
+	}
+	public long queryRange(int node,int start,int end,int l,int r) {
+		if(start>end||start>r||end<l)
 			return 0;
+		if(lazy[node]!=0) {
+			ST[node] +=(end-start+1)*lazy[node];
+			if(start!=end) {
+				lazy[node*2] += lazy[node];
+				lazy[node*2+1] += lazy[node];
+			}
+			lazy[node] = 0;
 		}
-		int mid = (low+high)/2;
-		return rangeSumQuery(qlow, qhigh, low, mid, 2*pos+1)+rangeSumQuery(qlow, qhigh, mid+1, high, 2*pos+2);
+		if(start >=l &&end<=r)
+			return ST[node];
+		int mid = (start+end)/2;
+		return queryRange(node*2, start, mid, l, r) + queryRange(node*2+1, mid+1, end, l, r);
 	}
-	public void updateST(int index,int delta,int low,int high,int pos) {
-		if(index<low||index>high) return;
-		if(low==high) {
-			ST[pos] += delta;
-			return;
-		}
-		int mid = (low+high)/2;
-		updateST(index, delta, low, mid, pos*2+1);
-		updateST(index, delta, mid+1, high, pos*2+2);
-		ST[pos] = ST[2*pos+1]+ST[2*pos+2];
-	}
-	public void updateSTRange(int sRange,int eRange,int delta,int low,int high,int pos) {
-		if(low>high||sRange>high||eRange<low) return;
-		if(low==high) {
-			ST[pos] += delta;
-			return;
-		}
-		int mid = (low+high)/2;
-		updateSTRange(sRange,eRange, delta, low, mid, pos*2+1);
-		updateSTRange(sRange,eRange, delta, mid+1, high, pos*2+2);
-		ST[pos] = ST[2*pos+1]+ST[2*pos+2];
+	public static void main(String args[]) {
+		SegmentTreeWithLazyProp s = new SegmentTreeWithLazyProp(5);
+		s.updateRange(0, 5, 5);
+		System.out.println(s.queryRange(0, 6));
+		s.updateRange(2, 5, 5);
+		System.out.println(s.queryRange(0, 6));
+		
 	}
 
 }
